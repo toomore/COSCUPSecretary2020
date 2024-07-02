@@ -22,6 +22,7 @@ from view.subscribe import VIEW_SUBSCRIBE
 from view.subscriber import VIEW_SUBSCRIBER
 from view.trello import VIEW_TRELLO
 from view.volunteer import VIEW_VOLUNTEER
+from view.token import VIEW_TOKEN
 
 logging.basicConfig(
     filename='./log/log.log',
@@ -40,6 +41,7 @@ app.register_blueprint(VIEW_SUBSCRIBE)
 app.register_blueprint(VIEW_SUBSCRIBER)
 app.register_blueprint(VIEW_TRELLO)
 app.register_blueprint(VIEW_VOLUNTEER)
+app.register_blueprint(VIEW_TOKEN)
 
 if app.debug:
     app.config['TEMPLATES_AUTO_RELOAD'] = True

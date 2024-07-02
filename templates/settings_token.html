@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{%block head_title%}Subscriber API Management - {%endblock%}
+{% block body %}
+<section class="hero is-primary">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                電子報系統設定
+            </h1>
+            <h2 class="subtitle">
+                API Token 設定
+            </h2>
+        </div>
+    </div>
+    <div class="hero-foot">
+        <nav class="tabs is-boxed">
+            <div class="container">
+                <ul>
+                    <li class="is-active"><span class="has-text-black"><a href="/">返回</a></span></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</section>
+<section class="section">
+    <div class="container" id="tokenManagement" v-cloak>
+        <div class="field">
+            <button class="button" v-on:click="setIsCreateTokenModelActive(true)">新增 Token</button>
+            <button class="button is-danger" :disabled="selectedToken.length === 0" v-on:click="removeTokens">刪除選定 Token</button>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>勾選</th>
+                        <th>編號</th>
+                        <th>標籤</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="token in tokenList">
+                        <td><input type="checkbox" :value="token.id" v-model="selectedToken" /></td>
+                        <td>[[ token.id ]]</td>
+                        <td>[[ token.label ]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="create-token-modal" class="modal" :class="{ 'is-active': isCreateTokenModelActive }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">新增 Token</p>
+                    <button class="delete" aria-label="close" v-on:click="setIsCreateTokenModelActive(false)"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="field">
+                        <label class="label">Token 標籤</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="輸入 Token 標籤" v-model="createNewTokenForm.label" />
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <div class="buttons">
+                        <button class="button is-primary" v-on:click="createToken">送出</button>
+                        <button class="button" v-on:click="setIsCreateTokenModelActive(false)">取消</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        <div id="create-token-successful-modal" class="modal" :class="{ 'is-active': isCreateTokenSuccessfulModelActive }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">新增 Token 成功</p>
+                </header>
+                <section class="modal-card-body">
+                    <div class="content">
+                        <p>此 Token 只會顯示一次，關掉此畫面後便無法複製此 Token</p>
+                        <ul>
+                            <li><b>標籤：</b>[[ createNewTokenResp.label ]]</li>
+                            <li><b>Token：</b>[[ createNewTokenResp.token ]]</li>
+                        </ul>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <div class="buttons">
+                        <button class="button is-success" v-on:click="reload">確認</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block js %}
+<script>
+    (() => {
+        let $tokenManagement = new Vue({
+            el: '#tokenManagement',
+            data: {
+                isCreateTokenModelActive: false,
+                isCreateTokenSuccessfulModelActive: false,
+                tokenList: [
+                    {
+                        id: 1,
+                        label: 'Test Token1'
+                    },
+                    {
+                        id: 2,
+                        label: 'Test Token2'
+                    },
+                    {
+                        id: 3,
+                        label: 'Test Token3'
+                    }
+                ],
+                selectedToken: [],
+                createNewTokenForm: {
+                    label: '',
+                },
+                createNewTokenResp: {
+                    label: '',
+                    token: '',
+                }
+            },
+            mounted: function() {
+                console.log('mounted');
+            },
+            methods: {
+                setIsCreateTokenModelActive: function (isActive) {
+                    this.isCreateTokenModelActive = isActive;
+                },
+                setIsCreateTokenSuccessfulModelActive: function (isActive) {
+                    this.isCreateTokenSuccessfulModelActive = isActive;
+                },
+                createToken: function() {
+                    const newToken = Math.random().toString(20).substr(2, 6)
+                    this.createNewTokenResp = {
+                        label: this.createNewTokenForm.label,
+                        token: newToken,
+                    }
+
+                    this.tokenList.push({
+                        id: this.tokenList.length + 1,
+                        label: this.createNewTokenResp.label,
+                    })
+
+                    this.setIsCreateTokenModelActive(false);
+                    this.setIsCreateTokenSuccessfulModelActive(true);
+                },
+                removeTokens: function() {
+                    this.tokenList = this.tokenList.filter((token) => !this.selectedToken.includes(token.id))
+                },
+                reload: function() {
+                    this.setIsCreateTokenSuccessfulModelActive(false);
+                },
+            },
+            delimiters: ['[[', ']]']
+        });
+    })();
+</script>
+{% endblock %}
