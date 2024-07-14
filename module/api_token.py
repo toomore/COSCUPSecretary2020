@@ -49,4 +49,7 @@ class APIToken:
             'serial_no': serial_no
         })
 
-        return hash_context.verify(token, hashed_token['token']) # type: ignore
+        if hashed_token is None:
+            return False
+
+        return hash_context.verify(token, hashed_token['token'])
