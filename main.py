@@ -10,7 +10,7 @@ import arrow
 import google_auth_oauthlib.flow
 from apiclient import discovery
 from flask import (Flask, g, got_request_exception, redirect, render_template,
-                   request, session, url_for)
+                   request, session, url_for, make_response)
 from flask.wrappers import Response
 from werkzeug.wrappers import Response as ResponseBase
 
@@ -23,6 +23,7 @@ from view.subscriber import VIEW_SUBSCRIBER
 from view.trello import VIEW_TRELLO
 from view.volunteer import VIEW_VOLUNTEER
 from view.token import VIEW_TOKEN
+from module.api_token import APIToken
 
 logging.basicConfig(
     filename='./log/log.log',
@@ -63,6 +64,16 @@ def need_login() -> ResponseBase | None:
                  request.headers.get('X-REAL-IP'),
                  request.headers.get('USER-AGENT'),
                  session, )
+    
+    if request.path.startswith('/volunteer'):
+        token = request.headers.get('Authorization')
+        if token is None:
+            return make_response('Unauthorized', 401)
+        
+        if APIToken.verify(token) is True:
+            return None
+
+        return make_response('Unauthorized', 401)
 
     if request.path not in NO_NEED_LOGIN_PATH \
             and not request.path.startswith('/subscriber') \

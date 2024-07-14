@@ -36,3 +36,17 @@ class APIToken:
         APITokenDB().delete_many({
             'serial_no': { '$in': tokens }
         })
+
+    @staticmethod
+    def verify(token: str) -> bool:
+        schema, token = token.split(' ')
+        if schema.lower() != 'bearer':
+            return False
+        
+        serial_no, token = token.split('|')
+        hash_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+        hashed_token = APITokenDB().find_one({
+            'serial_no': serial_no
+        })
+
+        return hash_context.verify(token, hashed_token['token']) # type: ignore
