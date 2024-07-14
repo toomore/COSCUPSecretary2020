@@ -25,33 +25,31 @@
 <section class="section">
     <div class="container" id="tokenManagement" v-cloak>
         <div class="field">
-            <button class="button" v-on:click="setIsCreateTokenModelActive(true)">新增 Token</button>
-            <button class="button is-danger" :disabled="selectedToken.length === 0" v-on:click="removeTokens">刪除選定 Token</button>
+            <button class="button" :class="{ 'is-loading': isLoading }" v-on:click="setIsCreateTokenModalActive(true)">新增 Token</button>
+            <button class="button is-danger" :class="{ 'is-loading': isLoading }" :disabled="selectedToken.length === 0" v-on:click="setIsRemoveTokenModalActive(true)">刪除選定 Token</button>
         </div>
         <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
                         <th>勾選</th>
-                        <th>編號</th>
                         <th>標籤</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="token in tokenList">
-                        <td><input type="checkbox" :value="token.id" v-model="selectedToken" /></td>
-                        <td>[[ token.id ]]</td>
+                        <td><input type="checkbox" :value="token" v-model="selectedToken" /></td>
                         <td>[[ token.label ]]</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div id="create-token-modal" class="modal" :class="{ 'is-active': isCreateTokenModelActive }">
+        <div id="create-token-modal" class="modal" :class="{ 'is-active': isCreateTokenModalActive }">
             <div class="modal-background"></div>
             <div class="modal-card">
                 <header class="modal-card-head">
                     <p class="modal-card-title">新增 Token</p>
-                    <button class="delete" aria-label="close" v-on:click="setIsCreateTokenModelActive(false)"></button>
+                    <button class="delete" aria-label="close" v-on:click="setIsCreateTokenModalActive(false)"></button>
                 </header>
                 <section class="modal-card-body">
                     <div class="field">
@@ -63,13 +61,13 @@
                 </section>
                 <footer class="modal-card-foot">
                     <div class="buttons">
-                        <button class="button is-primary" v-on:click="createToken">送出</button>
-                        <button class="button" v-on:click="setIsCreateTokenModelActive(false)">取消</button>
+                        <button class="button is-primary" :class="{ 'is-loading': isLoading }" v-on:click="createToken">送出</button>
+                        <button class="button" v-on:click="setIsCreateTokenModalActive(false)">取消</button>
                     </div>
                 </footer>
             </div>
         </div>
-        <div id="create-token-successful-modal" class="modal" :class="{ 'is-active': isCreateTokenSuccessfulModelActive }">
+        <div id="create-token-successful-modal" class="modal" :class="{ 'is-active': isCreateTokenSuccessfulModalActive }">
             <div class="modal-background"></div>
             <div class="modal-card">
                 <header class="modal-card-head">
@@ -91,31 +89,43 @@
                 </footer>
             </div>
         </div>
+        <div id="remove-tokens-modal" class="modal" :class="{ 'is-active': isRemoveTokenModalActive }">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">移除 Token</p>
+                    <button class="delete" aria-label="close" v-on:click="setIsRemoveTokenModalActive(false)"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="content">
+                        <p>是否確認要刪除以下 Token</p>
+                        <ul>
+                            <li v-for="token in selectedToken">[[ token.label ]]</li>
+                        </ul>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <div class="buttons">
+                        <button class="button is-danger" :class="{ 'is-loading': isLoading }" v-on:click="deleteTokens">確認刪除</button>
+                        <button class="button" v-on:click="setIsRemoveTokenModalActive(false)">取消</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}
 {% block js %}
+<script src="/js/axios.min.js"></script>
 <script>
     (() => {
         let $tokenManagement = new Vue({
             el: '#tokenManagement',
             data: {
-                isCreateTokenModelActive: false,
-                isCreateTokenSuccessfulModelActive: false,
-                tokenList: [
-                    {
-                        id: 1,
-                        label: 'Test Token1'
-                    },
-                    {
-                        id: 2,
-                        label: 'Test Token2'
-                    },
-                    {
-                        id: 3,
-                        label: 'Test Token3'
-                    }
-                ],
+                isCreateTokenModalActive: false,
+                isCreateTokenSuccessfulModalActive: false,
+                isRemoveTokenModalActive: false,
+                tokenList: [],
                 selectedToken: [],
                 createNewTokenForm: {
                     label: '',
@@ -123,38 +133,48 @@
                 createNewTokenResp: {
                     label: '',
                     token: '',
-                }
+                },
+                isLoading: false,
             },
-            mounted: function() {
-                console.log('mounted');
+            mounted: async function() {
+                this.isLoading = true;
+                const { data } = await axios.get('./list');
+                this.tokenList = data.tokens;
+                this.isLoading = false;
             },
             methods: {
-                setIsCreateTokenModelActive: function (isActive) {
-                    this.isCreateTokenModelActive = isActive;
+                setIsCreateTokenModalActive: function (isActive) {
+                    this.isCreateTokenModalActive = isActive;
                 },
-                setIsCreateTokenSuccessfulModelActive: function (isActive) {
-                    this.isCreateTokenSuccessfulModelActive = isActive;
+                setIsCreateTokenSuccessfulModalActive: function (isActive) {
+                    this.isCreateTokenSuccessfulModalActive = isActive;
                 },
-                createToken: function() {
-                    const newToken = Math.random().toString(20).substr(2, 6)
-                    this.createNewTokenResp = {
-                        label: this.createNewTokenForm.label,
-                        token: newToken,
+                setIsRemoveTokenModalActive: function (isActive) {
+                    this.isRemoveTokenModalActive = isActive;
+                },
+                createToken: async function() {
+                    try {
+                        this.isLoading = true;
+                        const { data } = await axios.post('./', this.createNewTokenForm);
+    
+                        this.createNewTokenResp = data;
+    
+                        this.setIsCreateTokenModalActive(false);
+                        this.setIsCreateTokenSuccessfulModalActive(true);
+                    } catch(err) {
+                        const { message } = err.response.data;
+                        alert(message);
+                    } finally {
+                        this.isLoading = false;
                     }
-
-                    this.tokenList.push({
-                        id: this.tokenList.length + 1,
-                        label: this.createNewTokenResp.label,
-                    })
-
-                    this.setIsCreateTokenModelActive(false);
-                    this.setIsCreateTokenSuccessfulModelActive(true);
                 },
-                removeTokens: function() {
-                    this.tokenList = this.tokenList.filter((token) => !this.selectedToken.includes(token.id))
+                deleteTokens: async function() {
+                    const tokens = this.selectedToken.map(({ serial_no }) => serial_no)
+                    await axios.delete('./', { data: { tokens } })
+                    window.location.reload();
                 },
                 reload: function() {
-                    this.setIsCreateTokenSuccessfulModelActive(false);
+                    window.location.reload();
                 },
             },
             delimiters: ['[[', ']]']
