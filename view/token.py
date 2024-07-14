@@ -8,6 +8,7 @@ VIEW_TOKEN = Blueprint('token', __name__, url_prefix='/token')
 
 @VIEW_TOKEN.errorhandler(BadRequest)
 def handle_bad_request(e: BadRequest) -> Response:
+    ''' Handle Bad Request exception '''
     return make_response({ 'message': e.description }, e.code)
 
 @VIEW_TOKEN.route('/', methods=('GET',))
@@ -33,7 +34,7 @@ def create_token() -> str | Response:
     create_token_dto = request.get_json()
 
     if 'label' not in create_token_dto or \
-        type(create_token_dto['label']) is not str or \
+        not isinstance(create_token_dto['label'], str) or \
         len(create_token_dto['label']) == 0:
         raise BadRequest('label should not be empty string.')
 
@@ -45,20 +46,43 @@ def create_token() -> str | Response:
 
 @VIEW_TOKEN.route('/list', methods=('GET',))
 def get_list() -> Response:
+    ''' API for getting list of tokens
+
+    Response Body (200):
+    {
+        "tokens": [
+            {
+                "serial_no": string,
+                "label": string
+            }
+        ]
+    }
+    '''
     tokens = APIToken.get_list()
     return jsonify({ 'tokens': tokens })
 
 @VIEW_TOKEN.route('/', methods=('DELETE',))
 def delete() -> Response:
+    ''' API for deleting token
+    Request Body: 
+    {
+        "serial_no": string,
+    }
+
+    Response Body (200):
+    {
+        "success": boolean,
+    }
+    '''
     delete_token_dto = request.get_json()
 
     if not isinstance(delete_token_dto['tokens'], list):
         raise BadRequest('tokens should be in the body and an array of string')
-    
+
     for token in delete_token_dto['tokens']:
-        if type(token) is not str:
+        if not isinstance(token, str):
             raise BadRequest('tokens should be an array of string')
-        
+
     APIToken.delete(delete_token_dto['tokens'])
-        
+
     return jsonify({ 'success': True })

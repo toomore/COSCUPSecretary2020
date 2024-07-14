@@ -64,12 +64,12 @@ def need_login() -> ResponseBase | None:
                  request.headers.get('X-REAL-IP'),
                  request.headers.get('USER-AGENT'),
                  session, )
-    
+
     if request.path.startswith('/volunteer'):
         token = request.headers.get('Authorization')
         if token is None:
             return make_response('Unauthorized', 401)
-        
+
         if APIToken.verify(token) is True:
             return None
 
