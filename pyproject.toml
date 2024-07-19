@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "coscupsecretary2020"
-version = "24.02.15"
+version = "24.07.20"
 description = ""
 authors = ["Toomore Chiang <toomore0929@gmail.com>"]
 license = "AGPL-3.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "~3.11"
 google-api-python-client = "^2.89.0"
 google-auth = "^2.20.0"
 google-auth-httplib2 = "^0.2.0"
