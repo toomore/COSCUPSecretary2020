@@ -12,12 +12,14 @@ ADD ./celery_task/__init__.py \
     ./celery_task/
 
 ADD ./models/__init__.py \
+    ./models/api_token.py \
     ./models/base.py \
     ./models/index.py \
     ./models/subscriberdb.py \
     ./models/
 
 ADD ./module/__init__.py \
+    ./module/api_token.py \
     ./module/awsses.py \
     ./module/ga.py \
     ./module/sender.py \
@@ -37,6 +39,7 @@ ADD ./templates/admin_subscriber_add.html \
     ./templates/base_subscribe.html \
     ./templates/base.html \
     ./templates/index.html \
+    ./templates/settings_token.html \
     ./templates/subscribe_coscup.html \
     ./templates/subscriber_error.html \
     ./templates/subscriber_intro.html \
@@ -49,5 +52,7 @@ ADD ./view/__init__.py \
     ./view/reader.py \
     ./view/subscribe.py \
     ./view/subscriber.py \
+    ./view/token.py \
     ./view/trello.py \
+    ./view/volunteer.py \
     ./view/
