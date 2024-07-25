@@ -40,9 +40,9 @@ app.register_blueprint(VIEW_ADMIN_SUBSCRIBER)
 app.register_blueprint(VIEW_READER)
 app.register_blueprint(VIEW_SUBSCRIBE)
 app.register_blueprint(VIEW_SUBSCRIBER)
+app.register_blueprint(VIEW_TOKEN)
 app.register_blueprint(VIEW_TRELLO)
 app.register_blueprint(VIEW_VOLUNTEER)
-app.register_blueprint(VIEW_TOKEN)
 
 if app.debug:
     app.config['TEMPLATES_AUTO_RELOAD'] = True

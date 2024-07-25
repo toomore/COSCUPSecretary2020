@@ -1,11 +1,10 @@
 ''' index '''
+from models.api_token import APITokenDB
 from models.subscriberdb import (SubscriberDB, SubscriberLoginTokenDB,
                                  SubscriberReadDB)
-from models.api_token import APITokenDB
 
 if __name__ == '__main__':
+    APITokenDB().index()
     SubscriberDB().index()
     SubscriberLoginTokenDB().index()
     SubscriberReadDB().index()
-
-    APITokenDB().index()
